@@ -17,6 +17,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
@@ -96,6 +97,61 @@ public class BookServiceTest {
         Optional<Book> book = service.getById(id);
 
         assertThat(book.isPresent()).isFalse();
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao tentar deletar um livro com id nulo.")
+    public void deleteBookIdNull() {
+
+        Book book = createValidBook();
+
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> service.delete(book))
+                .withMessage("Book id can't be null.");
+
+        Mockito.verify(repository, Mockito.never()).delete(book);
+    }
+
+    @Test
+    @DisplayName("Deve deletar um livro.")
+    public void deleteBook() {
+
+        Book book = Book.builder().id(1l).build();
+
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> service.delete(book));
+
+        Mockito.verify(repository, Mockito.times(1)).delete(book);
+
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao atualizar um livro com id nulo")
+    public void updateBookIdNull() {
+
+        Book book = createValidBook();
+
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> service.update(book))
+                .withMessage("Book id can't be null.");
+
+        Mockito.verify(repository, Mockito.never()).save(book);
+    }
+
+    @Test
+    @DisplayName("Deve atualizar um livro")
+    public void updateBook() {
+
+        Long id = 1l;
+        Book bookToUpdate = Book.builder().id(id).build();
+        Book updatedBook = createValidBook();
+        updatedBook.setId(id);
+
+        Mockito.when(repository.save(bookToUpdate)).thenReturn(updatedBook);
+
+        Book book = service.update(bookToUpdate);
+
+        assertThat(book.getId()).isEqualTo(id);
+        Mockito.verify(repository, Mockito.times(1)).save(book);
     }
 
 }

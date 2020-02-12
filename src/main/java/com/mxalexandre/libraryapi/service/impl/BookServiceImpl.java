@@ -7,7 +7,9 @@ import com.mxalexandre.libraryapi.service.BookService;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -38,12 +40,20 @@ public class BookServiceImpl implements BookService {
     @Override
     @CacheEvict("bookGetById")
     public void delete(Book book) {
+        if(book == null || book.getId() == null) {
+            throw new IllegalArgumentException("Book id can't be null.");
+        }
 
+        this.repository.delete(book);
     }
 
     @Override
     public Book update(Book book) {
-        return null;
+        if(book == null || book.getId() == null) {
+            throw new IllegalArgumentException("Book id can't be null.");
+        }
+
+        return this.repository.save(book);
     }
 
 }
