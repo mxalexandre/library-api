@@ -4,6 +4,9 @@ import com.mxalexandre.libraryapi.exception.BusinessException;
 import com.mxalexandre.libraryapi.model.entity.Book;
 import com.mxalexandre.libraryapi.model.repository.BookRepository;
 import com.mxalexandre.libraryapi.service.BookService;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -18,6 +21,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    @CachePut("bookGetById")
     public Book save(Book book) {
         if(repository.existsByIsbn(book.getIsbn())) {
             throw new BusinessException("Isbn já cadastrado.");
@@ -26,11 +30,13 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    @Cacheable("bookGetById")
     public Optional<Book> getById(long id) {
         return this.repository.findById(id);
     }
 
     @Override
+    @CacheEvict("bookGetById")
     public void delete(Book book) {
 
     }
